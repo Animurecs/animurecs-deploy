@@ -1,0 +1,71 @@
+---
+- name: Install dependencies
+  become: true
+  apt:
+    name: "{{item}}"
+  with_items:
+    - build-essential
+    - bison
+    - zlib1g-dev
+    - libyaml-dev
+    - libssl-dev
+    - libgdbm-dev
+    - libreadline-dev
+    - libffi-dev
+
+- name: Check if ruby-install is present
+  shell: test -x /usr/local/bin/ruby-install
+  ignore_errors: yes
+  register: rubyinstall_present
+
+- name: Download ruby-install
+  get_url:
+    url: https://github.com/postmodern/ruby-install/archive/v0.6.1.tar.gz
+    dest: /tmp/ruby-install-0.6.1.tar.gz
+  when: rubyinstall_present | failed
+
+- name: Extract ruby-install
+  unarchive:
+    src: /tmp/ruby-install-0.6.1.tar.gz
+    dest: /tmp
+    remote_src: yes
+  when: rubyinstall_present | failed
+
+- name: Install ruby-install
+  become: true
+  make:
+    chdir: /tmp/ruby-install-0.6.1
+    target: install
+  when: rubyinstall_present | failed
+
+- name: Check if chruby is present
+  shell: test -x /usr/local/bin/chruby-exec
+  ignore_errors: yes
+  register: chruby_present
+
+- name: Download chruby
+  get_url:
+    url: https://github.com/postmodern/chruby/archive/v{{chruby_version}}.tar.gz
+    dest: /tmp/chruby-{{chruby_version}}.tar.gz
+  when: chruby_present|failed
+
+- name: Extract chruby
+  unarchive:
+    src: /tmp/chruby-{{chruby_version}}.tar.gz
+    dest: /tmp
+    remote_src: yes
+  when: chruby_present|failed
+
+- name: Install chruby
+  become: true
+  command: "./scripts/setup.sh"
+  args:
+    chdir: /tmp/chruby-{{chruby_version}}
+  when: chruby_present|failed
+
+- name: Enable chruby system-wide
+  become: true
+  copy:
+    src: "{{role_path}}/files/etc/profile.d/chruby.sh"
+    dest: /etc/profile.d/chruby.sh
+  when: chruby_present|failed

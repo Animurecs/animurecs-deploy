@@ -1,0 +1,9 @@
+---
+- name: Check if ruby_version is already installed
+  stat: path={{rubies_location}}/ruby-{{ruby_version}}
+  register: ruby_version_present
+
+- name: Install Ruby
+  become: true
+  command: "ruby-install ruby-{{ruby_version}}"
+  when: not ruby_version_present.stat.exists

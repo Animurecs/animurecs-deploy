@@ -1,0 +1,37 @@
+---
+- name: Install dependencies
+  become: true
+  apt:
+    state: present
+    name: "{{item}}"
+  with_items:
+    - dirmngr
+    - gnupg
+
+- name: Add Passenger GPG key to apt keyring
+  become: true
+  apt_key: keyserver=keyserver.ubuntu.com id=561F9B9CAC40B2F7
+
+- name: Install dependencies
+  become: true
+  apt:
+    state: present
+    name: "{{item}}"
+  with_items:
+    - apt-transport-https
+    - ca-certificates
+
+- name: Add Passenger APT repository
+  become: true
+  apt_repository:
+    repo: "deb https://oss-binaries.phusionpassenger.com/apt/passenger xenial main"
+    state: present
+
+- name: Install phusion passenger
+  become: true
+  apt:
+    state: present
+    update_cache: yes
+    pkg: "{{item}}"
+  with_items:
+   - passenger

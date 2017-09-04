@@ -1,0 +1,4 @@
+---
+chruby_version: "0.3.9"
+rubies_location: /opt/rubies
+ruby_version: "2.4.1"
