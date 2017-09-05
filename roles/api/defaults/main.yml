@@ -1,0 +1,5 @@
+---
+app_branch: production
+app_dir: /home/apiuser/animurecs-api
+rails_env: production
+app_host: "91.121.30.162"

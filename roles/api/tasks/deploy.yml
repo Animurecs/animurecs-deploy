@@ -1,0 +1,57 @@
+---
+- name: Clone git repository
+  git:
+    repo: git@github.com:Animurecs/animurecs-api.git
+    version: "{{app_branch}}"
+    dest: "{{app_dir}}"
+    depth: 1
+    force: yes
+
+- name: Create bundle
+  shell: bash -c "source /usr/local/share/chruby/chruby.sh; source /usr/local/share/chruby/auto.sh;chruby {{ruby_version}}; bundle install --deployment --without development test"
+  args:
+    chdir: "{{app_dir}}"
+
+# - name: Secure configuration directories
+#   file:
+#     path: "{{app_dir}}/{{item}}"
+#     state: directory
+#     recurse: yes
+#     mode: 0700
+#   with_items:
+#     - config
+#     - db
+
+# - name: Configure application
+
+# - name: Secure configuration files
+#   file:
+#     path: "{{app_dir}}/{{item}}"
+#     state: file
+#     mode: 600
+#   with_items:
+#     - config/database.yml
+#     - config/secrets.yml
+
+- name: Compile assets and run migrations
+  shell: bash -c "source /usr/local/share/chruby/chruby.sh; source /usr/local/share/chruby/auto.sh;chruby {{ruby_version}}; bundle exec rake assets:precompile db:migrate RAILS_ENV={{rails_env}}"
+  args:
+    chdir: "{{app_dir}}"
+
+- name: Add nginx configuration
+  become: true
+  template:
+    src: usr/local/nginx/conf/sites-available/api.animurecs.com
+    dest: "{{nginx_conf_path}}/sites-available/api.animurecs.com"
+    mode: 0644
+
+- name: Enable API through nginx
+  become: true
+  file:
+    state: link
+    src: "{{nginx_conf_path}}/sites-available/api.animurecs.com"
+    dest: "{{nginx_conf_path}}/sites-enabled/api.animurecs.com"
+
+- name: Restart nginx
+  notify: "restart nginx"
+  command: /bin/true

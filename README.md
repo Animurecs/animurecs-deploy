@@ -1,2 +1,7 @@
 # animurecs-deploy
-Deployment playbooks for Animurecs.
+
+Deployment playbooks and scripts for Animurecs services.
+
+## Dependencies
+
+- Ansible >= 2.3.2
