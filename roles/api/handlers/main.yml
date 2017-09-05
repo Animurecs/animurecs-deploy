@@ -1,0 +1,4 @@
+---
+- name: restart passenger
+  command: bash -c "source /usr/local/share/chruby/chruby.sh; source /usr/local/share/chruby/auto.sh;chruby {{ruby_version}}; passenger-config restart-app '{{app_dir}}'"
+  listen: "restart web services"

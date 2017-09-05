@@ -1,1 +1,6 @@
 ---
+- name: Link 2.4.1 to 2.4.0 gems
+  file:
+    state: link
+    src: "/home/apiuser/.gem/ruby/2.4.1"
+    dest: "/home/apiuser/.gem/ruby/2.4.0"

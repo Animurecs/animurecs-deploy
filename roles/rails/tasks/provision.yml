@@ -1,4 +1,8 @@
 ---
+- name: Install bundle
+  become: true
+  command: gem install bundle
+
 - name: Install dependencies
   become: true
   apt:
@@ -8,7 +12,7 @@
     - dirmngr
     - gnupg
 
-- name: Add Passenger GPG key to apt keyring
+- name: Add passenger GPG key to apt keyring
   become: true
   apt_key: keyserver=keyserver.ubuntu.com id=561F9B9CAC40B2F7
 
@@ -21,7 +25,7 @@
     - apt-transport-https
     - ca-certificates
 
-- name: Add Passenger APT repository
+- name: Add passenger APT repository
   become: true
   apt_repository:
     repo: "deb https://oss-binaries.phusionpassenger.com/apt/passenger xenial main"
@@ -35,3 +39,43 @@
     pkg: "{{item}}"
   with_items:
    - passenger
+
+- name: Check if nginx is present
+  shell: "test -x {{nginx_sbin_path}}"
+  ignore_errors: yes
+  register: nginx_present
+
+- name: Download nginx
+  get_url:
+    url: http://nginx.org/download/nginx-{{nginx_version}}.tar.gz
+    dest: /tmp/nginx-{{nginx_version}}.tar.gz
+  when: nginx_present | failed
+
+- name: Extract nginx
+  unarchive:
+    src: /tmp/nginx-{{nginx_version}}.tar.gz
+    dest: /tmp
+    remote_src: yes
+  when: nginx_present | failed
+
+- name: Get passenger addon dir
+  command: passenger-config --nginx-addon-dir
+  register: passenger_addon_dir
+
+- name: Configure nginx
+  command: "./configure --prefix={{nginx_prefix}} --sbin-path={{nginx_sbin_path}} --conf-path={{nginx_conf_path}}/nginx.conf --error-log-path={{nginx_error_path}} --http-log-path={{nginx_log_path}} --pid-path={{nginx_pid_path}} --lock-path={{nginx_lock_path}} --user={{nginx_user}} --group={{nginx_group}} --with-file-aio --with-ipv6 --with-http_ssl_module --with-http_flv_module --with-http_mp4_module --with-http_gunzip_module --with-http_gzip_static_module --with-pcre --with-http_v2_module --add-module={{passenger_addon_dir.stdout}}"
+  args:
+    chdir: /tmp/nginx-{{nginx_version}}
+  when: nginx_present | failed
+
+- name: Compile nginx
+  make:
+    chdir: /tmp/nginx-{{nginx_version}}
+  when: nginx_present | failed
+
+- name: Install nginx
+  become: true
+  make:
+    chdir: /tmp/nginx-{{nginx_version}}
+    target: install
+  when: nginx_present | failed

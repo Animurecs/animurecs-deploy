@@ -1,0 +1,23 @@
+---
+- name: Add yarn APT key
+  become: true
+  shell: curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
+
+- name: Add yarn APT repository
+  become: true
+  apt_repository:
+    repo: "deb https://dl.yarnpkg.com/debian/ stable main"
+    state: present
+
+- name: Remove cmdtest
+  become: true
+  apt:
+    state: absent
+    name: cmdtest
+
+- name: Install yarn
+  become: true
+  apt:
+    state: present
+    name: "yarn"
+    update_cache: yes
