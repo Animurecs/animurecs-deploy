@@ -8,4 +8,6 @@ server {
     # Turn on Passenger
     passenger_enabled on;
     passenger_ruby {{rubies_location}}/ruby-{{ruby_version}}/bin/ruby;
+
+    passenger_env_var SECRET_KEY_BASE {{app_secret_key_base}};
 }

@@ -22,7 +22,11 @@
 #     - config
 #     - db
 
-# - name: Configure application
+- name: Copy secret key to configuration
+  template:
+    src: config/secrets.yml.key
+    dest: "{{app_dir}}/config/secrets.yml.key"
+    mode: 600
 
 # - name: Secure configuration files
 #   file:
