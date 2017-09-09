@@ -1,4 +1,4 @@
 ---
 - name: Reload configuration
-  notify: "reload nginx"
+  notify: reload postgres
   command: /bin/true
