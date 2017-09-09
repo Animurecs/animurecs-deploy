@@ -12,30 +12,30 @@
   args:
     chdir: "{{app_dir}}"
 
-# - name: Secure configuration directories
-#   file:
-#     path: "{{app_dir}}/{{item}}"
-#     state: directory
-#     recurse: yes
-#     mode: 0700
-#   with_items:
-#     - config
-#     - db
+- name: Secure configuration directories
+  file:
+    path: "{{app_dir}}/{{item}}"
+    state: directory
+    recurse: yes
+    mode: 0700
+  with_items:
+    - config
+    - db
 
-- name: Copy secret key to configuration
-  template:
-    src: config/secrets.yml.key
-    dest: "{{app_dir}}/config/secrets.yml.key"
-    mode: 600
+- name: Copy encryped secrets to configuration
+  copy:
+    src: config/secrets.yml.enc
+    dest: "{{app_dir}}/config/secrets.yml.enc"
+    mode: 0600
 
-# - name: Secure configuration files
-#   file:
-#     path: "{{app_dir}}/{{item}}"
-#     state: file
-#     mode: 600
-#   with_items:
-#     - config/database.yml
-#     - config/secrets.yml
+- name: Secure configuration files
+  file:
+    path: "{{app_dir}}/{{item}}"
+    state: file
+    mode: 0600
+  with_items:
+    - config/database.yml
+    - config/secrets.yml
 
 - name: Compile assets and run migrations
   shell: bash -c "source /usr/local/share/chruby/chruby.sh; source /usr/local/share/chruby/auto.sh;chruby {{ruby_version}}; bundle exec rake assets:precompile db:migrate RAILS_ENV={{rails_env}}"

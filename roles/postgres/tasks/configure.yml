@@ -1,1 +1,10 @@
 ---
+- name: Copy pg_hba.conf to destination
+  become: true
+  become_user: postgres
+  template:
+    src: etc/postgresql/9.6/main/pg_hba.conf
+    dest: /etc/postgresql/9.6/main/pg_hba.conf
+    mode: 0640
+    owner: postgres
+    group: postgres

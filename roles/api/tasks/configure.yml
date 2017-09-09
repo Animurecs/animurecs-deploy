@@ -4,3 +4,29 @@
     state: link
     src: "/home/apiuser/.gem/ruby/2.4.1"
     dest: "/home/apiuser/.gem/ruby/2.4.0"
+
+- name: Ensure database is created
+  become: true
+  become_user: postgres
+  postgresql_db:
+    name: "{{db_name}}"
+
+- name: Ensure user has access to the database
+  become: true
+  become_user: postgres
+  postgresql_user:
+    db: "{{db_name}}"
+    name: "{{db_user}}"
+    password: "{{db_password}}"
+    priv: ALL
+    role_attr_flags: NOSUPERUSER,NOCREATEDB
+
+- name: Ensure no other users can access the database
+  become: true
+  become_user: postgres
+  postgresql_privs:
+    db: "{{db_name}}"
+    role: PUBLIC
+    type: database
+    priv: ALL
+    state: absent
