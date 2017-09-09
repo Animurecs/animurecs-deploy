@@ -1,4 +1,4 @@
 ---
-- name: Reload configuration
-  notify: reload postgres
+- name: Restart postgres
+  notify: restart postgres
   command: /bin/true
